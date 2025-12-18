@@ -1,0 +1,639 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Davranış Karşılaştırma Testi — Benim Davranışlarım / Onun Davranışları</title>
+
+  <style>
+    :root{
+      --bg:#ffffff;
+      --text:#111;
+      --muted:#666;
+      --border:#e8e8e8;
+      --soft:#f7f7f7;
+      --focus:#0b5fff;
+      --radius:14px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+      line-height:1.35;
+      padding:18px 14px 40px;
+    }
+
+    .wrap{
+      max-width:980px;
+      margin:0 auto;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    header{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      margin-bottom:4px;
+    }
+    h1{
+      margin:0;
+      font-size:18px;
+      font-weight:700;
+      letter-spacing:-0.2px;
+    }
+    .sub{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .card{
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      background:#fff;
+      padding:14px;
+    }
+
+    .section-title{
+      margin:0 0 10px 0;
+      font-size:14px;
+      font-weight:800;
+    }
+
+    /* --- TABLE --- */
+    .table-scroll{
+      overflow-x:auto;
+      -webkit-overflow-scrolling:touch;
+      border-radius:12px;
+      border:1px solid var(--border);
+    }
+
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      min-width:720px;
+      background:#fff;
+    }
+
+    thead th{
+      position:sticky;
+      top:0;
+      background:var(--soft);
+      z-index:3;
+      font-weight:800;
+      font-size:12px;
+      color:#222;
+      border-bottom:1px solid var(--border);
+      padding:10px 10px;
+      text-align:center;
+      white-space:nowrap;
+    }
+
+    /* SOL SÜTUN SABİT */
+    thead th:first-child,
+    tbody td:first-child{
+      position:sticky;
+      left:0;
+      z-index:4;
+      background:#fff;
+      box-shadow:1px 0 0 var(--border);
+    }
+    thead th:first-child{
+      background:var(--soft);
+      z-index:6;
+      text-align:left;
+      padding-left:12px;
+    }
+
+    tbody td{
+      border-bottom:1px solid var(--border);
+      padding:10px 10px;
+      text-align:center;
+      vertical-align:middle;
+    }
+    tbody tr:last-child td{border-bottom:none;}
+    tbody td:first-child{
+      text-align:left;
+      font-weight:700;
+      padding-left:12px;
+      white-space:nowrap;
+    }
+
+    /* UÇ TANIM SATIRI */
+    .hint-row td{
+      padding:6px 10px;
+      border-bottom:none;
+      background:#fff;
+      font-size:11px;
+      color:var(--muted);
+    }
+    .hint-row td:first-child{
+      color:transparent;
+      user-select:none;
+    }
+    .hint-row td.label{
+      font-weight:800;
+      color:var(--muted);
+      white-space:nowrap;
+    }
+
+    .rwrap{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-width:38px;
+      min-height:34px;
+    }
+    input[type="radio"]{
+      width:18px;
+      height:18px;
+      accent-color:var(--focus);
+      cursor:pointer;
+    }
+
+    .status{
+      margin-top:10px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border:1px solid var(--border);
+      border-radius:999px;
+      font-size:12px;
+      color:#222;
+      background:#fff;
+    }
+    .pill b{font-weight:900}
+
+    .btn{
+      border:1px solid var(--border);
+      background:#fff;
+      color:#111;
+      border-radius:999px;
+      padding:9px 12px;
+      font-weight:800;
+      font-size:12px;
+      cursor:pointer;
+    }
+    .btn:focus{outline:3px solid rgba(11,95,255,.2); outline-offset:2px;}
+    .btn:hover{background:#fafafa}
+
+    .hint{
+      color:var(--muted);
+      font-size:12px;
+      margin:0;
+    }
+
+    .hidden{display:none !important;}
+
+    /* chart */
+    .chart-box{
+      border:1px dashed var(--border);
+      border-radius:12px;
+      padding:12px;
+      background:#fff;
+    }
+    .chart-stack{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+    }
+    @media (min-width: 860px){
+      .chart-stack{grid-template-columns:1fr 1fr;}
+    }
+    .chart-title{
+      margin:0 0 8px 0;
+      font-size:12px;
+      font-weight:900;
+      color:#222;
+    }
+    .chart-panel{
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:12px;
+      background:#fff;
+      min-height:320px;
+    }
+    canvas{max-width:100% !important; width:100% !important;}
+
+    /* comparison list */
+    .list{
+      margin:0;
+      padding:0;
+      list-style:none;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:10px 12px;
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:#fff;
+      font-size:13px;
+    }
+    .row .name{font-weight:900}
+    .row .meta{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      color:#111;
+      font-weight:700;
+      white-space:nowrap;
+    }
+    .chip{
+      border:1px solid var(--border);
+      border-radius:999px;
+      padding:4px 8px;
+      font-size:12px;
+      font-weight:900;
+      background:#fff;
+    }
+
+    footer{
+      margin-top:2px;
+      color:var(--muted);
+      font-size:11px;
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <h1 style="text-align:center;">Davranış Karşılaştırma Testi</h1>
+      <p class="sub">Önce <b>Benim Davranışlarım</b>, sonra aynı kriterlerle <b>Onun Davranışları</b> değerlendirmesi yap. Her iki seçim tamamlanınca iki radar grafik görünür. En altta “bende fazla olanlar” listelenir.</p>
+    </header>
+
+    <!-- BENİM DAVRANIŞLARIM -->
+    <section class="card" aria-labelledby="sec-me">
+      <h2 class="section-title" id="sec-me">Benim Davranışlarım</h2>
+
+      <div class="table-scroll" role="region" aria-label="Benim davranışlarım tablosu (yatay kaydırılabilir)">
+        <table id="tableMe">
+          <thead>
+            <tr>
+              <th>Davranış</th>
+              <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="status">
+        <span class="pill">Tamamlanan: <b id="doneMe">0</b>/<b id="totalMe">0</b></span>
+        <button class="btn" id="resetMe" type="button">Benim alanı sıfırla</button>
+      </div>
+
+      <p class="hint">Not: Bu bölüm tamamlanınca “Benim Grafik” otomatik oluşur.</p>
+    </section>
+
+    <!-- ONUN DAVRANIŞLARI -->
+    <section class="card" aria-labelledby="sec-other">
+      <h2 class="section-title" id="sec-other">Onun Davranışları</h2>
+
+      <div class="table-scroll" role="region" aria-label="Onun davranışları tablosu (yatay kaydırılabilir)">
+        <table id="tableOther">
+          <thead>
+            <tr>
+              <th>Davranış</th>
+              <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="status">
+        <span class="pill">Tamamlanan: <b id="doneOther">0</b>/<b id="totalOther">0</b></span>
+        <button class="btn" id="resetOther" type="button">Onun alanını sıfırla</button>
+      </div>
+
+      <p class="hint">Not: Bu bölüm tamamlanınca “Onun Grafik” otomatik oluşur.</p>
+    </section>
+
+    <!-- GRAFİKLER -->
+    <section class="card" aria-labelledby="sec-charts">
+      <h2 class="section-title" id="sec-charts">Grafikler</h2>
+
+      <div class="chart-box">
+        <div class="chart-stack">
+          <div class="chart-panel">
+            <p class="chart-title">Benim Grafik</p>
+            <p class="hint" id="hintChartMe">Grafiği görmek için “Benim Davranışlarım” bölümündeki tüm seçimleri tamamla.</p>
+            <div id="wrapChartMe" class="hidden">
+              <canvas id="chartMe" height="260" aria-label="Benim radar grafik" role="img"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-panel">
+            <p class="chart-title">Onun Grafik</p>
+            <p class="hint" id="hintChartOther">Grafiği görmek için “Onun Davranışları” bölümündeki tüm seçimleri tamamla.</p>
+            <div id="wrapChartOther" class="hidden">
+              <canvas id="chartOther" height="260" aria-label="Onun radar grafik" role="img"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- KARŞILAŞTIRMA -->
+    <section class="card" aria-labelledby="sec-compare">
+      <h2 class="section-title" id="sec-compare">Bende Fazla Olan Davranışlar</h2>
+      <p class="hint" id="hintCompare">Her iki değerlendirme de tamamlanınca, “bende daha yüksek olan” davranışlar burada listelenir.</p>
+
+      <div id="wrapCompare" class="hidden">
+        <ul class="list" id="compareList"></ul>
+        <p class="hint" id="hintCompareEmpty" style="margin-top:10px" class="hidden"></p>
+      </div>
+    </section>
+
+    <footer>Arka plan: beyaz • Mobil: tablo yatay kaydırılabilir • Sol sütun sabit • 2 değerlendirme + 2 radar grafik + fark listesi</footer>
+  </div>
+
+  <script>
+    // Davranışlar alfabetik (Türkçe) sırada
+    const behaviors = [
+      "Duruş",
+      "Ellerin Kullanımı",
+      "Göz Teması",
+      "İçerik",
+      "Kelime Sayısı",
+      "Konuşma Hızı",
+      "Mimikler",
+      "Sesin Hacmi"
+    ];
+
+    // Uç tanımları (1 ve 9)
+    const endpoints = {
+      "Konuşma Hızı":       { low: "Yavaş",      high: "Hızlı" },
+      "Sesin Hacmi":        { low: "Zayıf",      high: "Güçlü" },
+      "Mimikler":           { low: "Kontrollü",  high: "Hareketli" },
+      "Göz Teması":         { low: "Dolaylı",    high: "Doğrudan" },
+      "Ellerin Kullanımı":  { low: "Az",         high: "Çok" },
+      "Duruş":              { low: "Çekingen",   high: "Atak" },
+      "İçerik":             { low: "Hikayeler",  high: "Gerçekler" },
+      "Kelime Sayısı":      { low: "Az",         high: "Çok" }
+    };
+
+    // --- DOM ---
+    const tableMeBody = document.querySelector("#tableMe tbody");
+    const tableOtherBody = document.querySelector("#tableOther tbody");
+
+    const doneMeEl = document.getElementById("doneMe");
+    const doneOtherEl = document.getElementById("doneOther");
+    const totalMeEl = document.getElementById("totalMe");
+    const totalOtherEl = document.getElementById("totalOther");
+
+    const resetMeBtn = document.getElementById("resetMe");
+    const resetOtherBtn = document.getElementById("resetOther");
+
+    const hintChartMe = document.getElementById("hintChartMe");
+    const hintChartOther = document.getElementById("hintChartOther");
+    const wrapChartMe = document.getElementById("wrapChartMe");
+    const wrapChartOther = document.getElementById("wrapChartOther");
+
+    const hintCompare = document.getElementById("hintCompare");
+    const wrapCompare = document.getElementById("wrapCompare");
+    const compareList = document.getElementById("compareList");
+
+    totalMeEl.textContent = behaviors.length;
+    totalOtherEl.textContent = behaviors.length;
+
+    // --- Build tables ---
+    function buildTable(tbody, prefix){
+      tbody.innerHTML = "";
+
+      behaviors.forEach((name, idx) => {
+        // hint row
+        const hintTr = document.createElement("tr");
+        hintTr.className = "hint-row";
+
+        const hintFirst = document.createElement("td");
+        hintFirst.textContent = name;
+        hintTr.appendChild(hintFirst);
+
+        for(let v=1; v<=9; v++){
+          const td = document.createElement("td");
+          if(v === 1){
+            td.className = "label";
+            td.textContent = endpoints[name]?.low ?? "";
+          } else if(v === 9){
+            td.className = "label";
+            td.textContent = endpoints[name]?.high ?? "";
+          }
+          hintTr.appendChild(td);
+        }
+
+        // main row
+        const tr = document.createElement("tr");
+
+        const tdName = document.createElement("td");
+        tdName.textContent = name;
+        tr.appendChild(tdName);
+
+        for(let v=1; v<=9; v++){
+          const td = document.createElement("td");
+          const wrap = document.createElement("div");
+          wrap.className = "rwrap";
+
+          const input = document.createElement("input");
+          input.type = "radio";
+          input.name = `${prefix}_${idx}`; // her blok kendi radio grubunda
+          input.value = String(v);
+          input.setAttribute("aria-label", `${prefix === 'me' ? 'Benim' : 'Onun'} — ${name} şiddet ${v}`);
+          input.addEventListener("change", onAnyChange);
+
+          wrap.appendChild(input);
+          td.appendChild(wrap);
+          tr.appendChild(td);
+        }
+
+        tbody.appendChild(hintTr);
+        tbody.appendChild(tr);
+      });
+    }
+
+    function getSelections(prefix){
+      return behaviors.map((_, idx) => {
+        const checked = document.querySelector(`input[name="${prefix}_${idx}"]:checked`);
+        return checked ? Number(checked.value) : null;
+      });
+    }
+
+    function updateProgress(prefix, outEl){
+      const selections = getSelections(prefix);
+      const done = selections.filter(v => v !== null).length;
+      outEl.textContent = done;
+      return { selections, allDone: done === behaviors.length };
+    }
+
+    // --- Charts ---
+    let chartMeInstance = null;
+    let chartOtherInstance = null;
+
+    function renderChart(canvasId, instanceRef, data){
+      const ctx = document.getElementById(canvasId);
+
+      if(instanceRef.current){
+        instanceRef.current.data.labels = behaviors;
+        instanceRef.current.data.datasets[0].data = data;
+        instanceRef.current.update();
+        return;
+      }
+
+      instanceRef.current = new Chart(ctx, {
+        type: "radar",
+        data: {
+          labels: behaviors,
+          datasets: [{
+            label: "Şiddet (1–9)",
+            data,
+            fill: true,
+            borderWidth: 2,
+            pointRadius: 3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            r: {
+              min: 1,
+              max: 9,
+              ticks: { stepSize: 1 }
+            }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: { label: (ctx) => `${ctx.label}: ${ctx.parsed.r}` }
+            }
+          }
+        }
+      });
+    }
+
+    function renderCompareList(meData, otherData){
+      compareList.innerHTML = "";
+
+      const diffs = behaviors.map((name, i) => ({
+        name,
+        me: meData[i],
+        other: otherData[i],
+        diff: meData[i] - otherData[i]
+      })).filter(x => x.diff > 0)
+        .sort((a,b) => b.diff - a.diff);
+
+      if(diffs.length === 0){
+        const li = document.createElement("li");
+        li.className = "row";
+        li.innerHTML = `<span class="name">Bende daha yüksek davranış yok</span>
+                        <span class="meta"><span class="chip">Fark: 0+</span></span>`;
+        compareList.appendChild(li);
+        return;
+      }
+
+      diffs.forEach(item => {
+        const li = document.createElement("li");
+        li.className = "row";
+
+        const left = document.createElement("span");
+        left.className = "name";
+        left.textContent = item.name;
+
+        const right = document.createElement("span");
+        right.className = "meta";
+        right.innerHTML = `
+          <span class="chip">Ben: ${item.me}</span>
+          <span class="chip">O: ${item.other}</span>
+          <span class="chip">+${item.diff}</span>
+        `;
+
+        li.appendChild(left);
+        li.appendChild(right);
+        compareList.appendChild(li);
+      });
+    }
+
+    // --- Main update ---
+    function onAnyChange(){
+      const me = updateProgress("me", doneMeEl);
+      const other = updateProgress("other", doneOtherEl);
+
+      // Benim grafik
+      if(me.allDone){
+        hintChartMe.classList.add("hidden");
+        wrapChartMe.classList.remove("hidden");
+        const meData = me.selections.map(Number);
+        renderChart("chartMe", { current: chartMeInstance }, meData);
+        chartMeInstance = Chart.getChart("chartMe") || chartMeInstance;
+      } else {
+        hintChartMe.classList.remove("hidden");
+        wrapChartMe.classList.add("hidden");
+      }
+
+      // Onun grafik
+      if(other.allDone){
+        hintChartOther.classList.add("hidden");
+        wrapChartOther.classList.remove("hidden");
+        const otherData = other.selections.map(Number);
+        renderChart("chartOther", { current: chartOtherInstance }, otherData);
+        chartOtherInstance = Chart.getChart("chartOther") || chartOtherInstance;
+      } else {
+        hintChartOther.classList.remove("hidden");
+        wrapChartOther.classList.add("hidden");
+      }
+
+      // Karşılaştırma
+      if(me.allDone && other.allDone){
+        hintCompare.classList.add("hidden");
+        wrapCompare.classList.remove("hidden");
+
+        const meData = me.selections.map(Number);
+        const otherData = other.selections.map(Number);
+        renderCompareList(meData, otherData);
+      } else {
+        hintCompare.classList.remove("hidden");
+        wrapCompare.classList.add("hidden");
+      }
+    }
+
+    resetMeBtn.addEventListener("click", () => {
+      document.querySelectorAll('input[type="radio"][name^="me_"]').forEach(r => r.checked = false);
+      onAnyChange();
+    });
+
+    resetOtherBtn.addEventListener("click", () => {
+      document.querySelectorAll('input[type="radio"][name^="other_"]').forEach(r => r.checked = false);
+      onAnyChange();
+    });
+
+    // init
+    buildTable(tableMeBody, "me");
+    buildTable(tableOtherBody, "other");
+    onAnyChange();
+  </script>
+</body>
+</html>
