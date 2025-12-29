@@ -16,6 +16,8 @@
       --radius:14px;
       --color-me: #2563eb;      /* Mavi - Ben */
       --color-other: #dc2626;   /* Kırmızı - O */
+      --selected-text: #111;    /* Seçili metin rengi */
+      --unselected-text: #999;  /* Seçilmemiş metin rengi */
     }
 
     *{box-sizing:border-box}
@@ -170,6 +172,16 @@
       font-weight:700;
       padding-left:12px;
       white-space:nowrap;
+    }
+
+    /* SEÇİLİ DAVRANIŞ STİLİ */
+    .behavior-selected {
+      font-weight: 900 !important;
+      color: var(--selected-text) !important;
+    }
+    .behavior-unselected {
+      font-weight: 400 !important;
+      color: var(--unselected-text) !important;
     }
 
     /* UÇ TANIM SATIRI */
@@ -644,6 +656,24 @@
     headerMe.addEventListener("click", () => toggleAccordion(accordionMe, headerMe));
     headerOther.addEventListener("click", () => toggleAccordion(accordionOther, headerOther));
 
+    // --- YENİ: Davranış Stil Güncelleme Fonksiyonu ---
+    function updateBehaviorStyles(prefix) {
+      behaviors.forEach((_, idx) => {
+        const behaviorCell = document.querySelector(`#table${prefix === 'me' ? 'Me' : 'Other'} tbody tr:nth-child(${(idx * 2) + 2}) td:first-child`);
+        const isSelected = document.querySelector(`input[name="${prefix}_${idx}"]:checked`) !== null;
+        
+        if (behaviorCell) {
+          if (isSelected) {
+            behaviorCell.classList.add('behavior-selected');
+            behaviorCell.classList.remove('behavior-unselected');
+          } else {
+            behaviorCell.classList.add('behavior-unselected');
+            behaviorCell.classList.remove('behavior-selected');
+          }
+        }
+      });
+    }
+
     // --- Build tables ---
     function buildTable(tbody, prefix){
       tbody.innerHTML = "";
@@ -674,6 +704,7 @@
 
         const tdName = document.createElement("td");
         tdName.textContent = name;
+        tdName.classList.add('behavior-unselected'); // Başlangıçta seçilmemiş
         tr.appendChild(tdName);
 
         for(let v=1; v<=9; v++){
@@ -686,7 +717,10 @@
           input.name = `${prefix}_${idx}`; // her blok kendi radio grubunda
           input.value = String(v);
           input.setAttribute("aria-label", `${prefix === 'me' ? 'Benim' : 'Onun'} — ${name} şiddet ${v}`);
-          input.addEventListener("change", onAnyChange);
+          input.addEventListener("change", () => {
+            onAnyChange();
+            updateBehaviorStyles(prefix);
+          });
 
           wrap.appendChild(input);
           td.appendChild(wrap);
@@ -709,6 +743,10 @@
       const selections = getSelections(prefix);
       const done = selections.filter(v => v !== null).length;
       outEl.textContent = done;
+      
+      // Davranış stillerini güncelle
+      updateBehaviorStyles(prefix);
+      
       return { selections, allDone: done === behaviors.length };
     }
 
@@ -931,11 +969,13 @@
 
     resetMeBtn.addEventListener("click", () => {
       document.querySelectorAll('input[type="radio"][name^="me_"]').forEach(r => r.checked = false);
+      updateBehaviorStyles('me');
       onAnyChange();
     });
 
     resetOtherBtn.addEventListener("click", () => {
       document.querySelectorAll('input[type="radio"][name^="other_"]').forEach(r => r.checked = false);
+      updateBehaviorStyles('other');
       onAnyChange();
     });
 
