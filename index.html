@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Davranış Karşılaştırma Testi — Benim Davranışlarım / Onun Davranışları</title>
+  <title>F.A.S.T: Davranış Karşılaştırma — Benim Davranışlarım / Onun Davranışları</title>
 
   <style>
     :root{
@@ -14,6 +14,8 @@
       --soft:#f7f7f7;
       --focus:#0b5fff;
       --radius:14px;
+      --color-me: #2563eb;      /* Mavi - Ben */
+      --color-other: #dc2626;   /* Kırmızı - O */
     }
 
     *{box-sizing:border-box}
@@ -56,7 +58,51 @@
       border:1px solid var(--border);
       border-radius:var(--radius);
       background:#fff;
-      padding:14px;
+    }
+
+    /* AKORDEON BAŞLIK STİLİ */
+    .accordion-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.2s;
+    }
+    .accordion-header:hover {
+      background-color: var(--soft);
+    }
+    .accordion-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+      font-size: 14px;
+      font-weight: 800;
+    }
+    .accordion-icon {
+      font-size: 12px;
+      transition: transform 0.3s ease;
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+    }
+    .accordion-content {
+      padding: 0 14px;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, padding 0.4s ease;
+    }
+    .accordion-open .accordion-content {
+      padding-bottom: 14px;
+      max-height: 2000px;
+    }
+    .accordion-open .accordion-icon {
+      transform: rotate(90deg);
     }
 
     .section-title{
@@ -71,6 +117,7 @@
       -webkit-overflow-scrolling:touch;
       border-radius:12px;
       border:1px solid var(--border);
+      margin-top: 10px;
     }
 
     table{
@@ -195,12 +242,12 @@
     .hint{
       color:var(--muted);
       font-size:12px;
-      margin:0;
+      margin:10px 0 0 0;
     }
 
     .hidden{display:none !important;}
 
-    /* chart */
+    /* chart - OPTİMİZE EDİLDİ */
     .chart-box{
       border:1px dashed var(--border);
       border-radius:12px;
@@ -215,6 +262,9 @@
     @media (min-width: 860px){
       .chart-stack{grid-template-columns:1fr 1fr;}
     }
+    @media (min-width: 1100px){
+      .chart-stack{grid-template-columns:1fr 1fr 1fr;}
+    }
     .chart-title{
       margin:0 0 8px 0;
       font-size:12px;
@@ -226,46 +276,119 @@
       border-radius:12px;
       padding:12px;
       background:#fff;
-      min-height:320px;
+      /* Sabit min-height kaldırıldı, içerik boyutuna göre ayarlandı */
+      display: flex;
+      flex-direction: column;
     }
-    canvas{max-width:100% !important; width:100% !important;}
+    .chart-container {
+      flex: 1;
+      min-height: 0; /* Flex container içinde boyut kontrolü */
+      position: relative;
+    }
+    canvas{
+      max-width:100% !important;
+      width:100% !important;
+      height: 240px !important; /* Sabit yükseklik */
+    }
 
-    /* comparison list */
-    .list{
-      margin:0;
-      padding:0;
-      list-style:none;
-      display:flex;
-      flex-direction:column;
-      gap:8px;
+    /* Renk göstergesi */
+    .chart-legend {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 10px;
+      font-size: 11px;
+      font-weight: 700;
     }
-    .row{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding:10px 12px;
-      border:1px solid var(--border);
-      border-radius:12px;
-      background:#fff;
-      font-size:13px;
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
-    .row .name{font-weight:900}
-    .row .meta{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      color:#111;
-      font-weight:700;
-      white-space:nowrap;
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
     }
-    .chip{
-      border:1px solid var(--border);
-      border-radius:999px;
-      padding:4px 8px;
-      font-size:12px;
-      font-weight:900;
-      background:#fff;
+    .legend-color.me {
+      background-color: var(--color-me);
+    }
+    .legend-color.other {
+      background-color: var(--color-other);
+    }
+
+    /* KARŞILAŞTIRMA TABLOSU */
+    .compare-table-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 500px;
+      background: #fff;
+    }
+    
+    .compare-table thead th {
+      background: var(--soft);
+      font-weight: 800;
+      font-size: 12px;
+      color: #222;
+      border-bottom: 2px solid var(--border);
+      padding: 12px 10px;
+      text-align: center;
+      white-space: nowrap;
+    }
+    
+    .compare-table tbody td {
+      border-bottom: 1px solid var(--border);
+      padding: 12px 10px;
+      text-align: center;
+      vertical-align: middle;
+      font-size: 13px;
+    }
+    
+    .compare-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .compare-table .behavior-name {
+      text-align: left;
+      font-weight: 700;
+      padding-left: 12px;
+      white-space: nowrap;
+    }
+    
+    .compare-table .score {
+      font-weight: 900;
+      font-size: 14px;
+    }
+    
+    .compare-table .diff {
+      font-weight: 900;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 13px;
+      display: inline-block;
+      min-width: 50px;
+    }
+    
+    .diff-positive {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+    
+    .diff-negative {
+      background: #ffebee;
+      color: #c62828;
+    }
+    
+    .diff-zero {
+      background: #f5f5f5;
+      color: #666;
     }
 
     footer{
@@ -281,95 +404,158 @@
 <body>
   <div class="wrap">
     <header>
-      <h1 style="text-align:center;">Davranış Karşılaştırma Testi</h1>
-      <p class="sub">Önce <b>Benim Davranışlarım</b>, sonra aynı kriterlerle <b>Onun Davranışları</b> değerlendirmesi yap. Her iki seçim tamamlanınca iki radar grafik görünür. En altta “bende fazla olanlar” listelenir.</p>
+      <h1 style="text-align:center;">F.A.S.T. Davranış Karşılaştırma</h1>
+      <p class="sub">Önce <b>Benim Davranışlarım</b>, sonra aynı kriterlerle <b>Onun Davranışları</b> değerlendirmesi yap. Her iki seçim tamamlanınca üç radar grafik görünür.</p>
     </header>
 
-    <!-- BENİM DAVRANIŞLARIM -->
-    <section class="card" aria-labelledby="sec-me">
-      <h2 class="section-title" id="sec-me">Benim Davranışlarım</h2>
-
-      <div class="table-scroll" role="region" aria-label="Benim davranışlarım tablosu (yatay kaydırılabilir)">
-        <table id="tableMe">
-          <thead>
-            <tr>
-              <th>Davranış</th>
-              <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+    <!-- BENİM DAVRANIŞLARIM - AKORDEON -->
+    <section class="card accordion" id="accordion-me">
+      <div class="accordion-header" id="header-me" aria-expanded="false" aria-controls="content-me">
+        <h2 class="accordion-title">
+          <span class="accordion-icon">▶</span>
+          Benim Davranışlarım
+        </h2>
       </div>
+      <div class="accordion-content" id="content-me">
+        <div class="table-scroll" role="region" aria-label="Benim davranışlarım tablosu (yatay kaydırılabilir)">
+          <table id="tableMe">
+            <thead>
+              <tr>
+                <th>Davranış</th>
+                <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
 
-      <div class="status">
-        <span class="pill">Tamamlanan: <b id="doneMe">0</b>/<b id="totalMe">0</b></span>
-        <button class="btn" id="resetMe" type="button">Benim alanı sıfırla</button>
+        <div class="status">
+          <span class="pill">Tamamlanan: <b id="doneMe">0</b>/<b id="totalMe">0</b></span>
+          <button class="btn" id="resetMe" type="button">Temizle</button>
+        </div>
+
+        <p class="hint">Not: Bu bölüm tamamlanınca "Benim Konfor Alanı Grafiğim" otomatik oluşur.</p>
       </div>
-
-      <p class="hint">Not: Bu bölüm tamamlanınca “Benim Grafik” otomatik oluşur.</p>
     </section>
 
-    <!-- ONUN DAVRANIŞLARI -->
-    <section class="card" aria-labelledby="sec-other">
-      <h2 class="section-title" id="sec-other">Onun Davranışları</h2>
-
-      <div class="table-scroll" role="region" aria-label="Onun davranışları tablosu (yatay kaydırılabilir)">
-        <table id="tableOther">
-          <thead>
-            <tr>
-              <th>Davranış</th>
-              <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+    <!-- ONUN DAVRANIŞLARI - AKORDEON -->
+    <section class="card accordion" id="accordion-other">
+      <div class="accordion-header" id="header-other" aria-expanded="false" aria-controls="content-other">
+        <h2 class="accordion-title">
+          <span class="accordion-icon">▶</span>
+          Onun Davranışları
+        </h2>
       </div>
+      <div class="accordion-content" id="content-other">
+        <div class="table-scroll" role="region" aria-label="Onun davranışları tablosu (yatay kaydırılabilir)">
+          <table id="tableOther">
+            <thead>
+              <tr>
+                <th>Davranış</th>
+                <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
 
-      <div class="status">
-        <span class="pill">Tamamlanan: <b id="doneOther">0</b>/<b id="totalOther">0</b></span>
-        <button class="btn" id="resetOther" type="button">Onun alanını sıfırla</button>
+        <div class="status">
+          <span class="pill">Tamamlanan: <b id="doneOther">0</b>/<b id="totalOther">0</b></span>
+          <button class="btn" id="resetOther" type="button">Temizle</button>
+        </div>
+
+        <p class="hint">Not: Bu bölüm tamamlanınca "Onun Konfor Alanı Grafiği" otomatik oluşur.</p>
       </div>
-
-      <p class="hint">Not: Bu bölüm tamamlanınca “Onun Grafik” otomatik oluşur.</p>
     </section>
 
-    <!-- GRAFİKLER -->
+    <!-- GRAFİKLER - 3 GRAFİKLİ -->
     <section class="card" aria-labelledby="sec-charts">
       <h2 class="section-title" id="sec-charts">Grafikler</h2>
 
       <div class="chart-box">
         <div class="chart-stack">
+          <!-- BENİM GRAFİĞİ -->
           <div class="chart-panel">
-            <p class="chart-title">Benim Grafik</p>
-            <p class="hint" id="hintChartMe">Grafiği görmek için “Benim Davranışlarım” bölümündeki tüm seçimleri tamamla.</p>
+            <p class="chart-title">Benim Konfor Alanım</p>
+            <p class="hint" id="hintChartMe">Grafiği görmek için "Benim Davranışlarım" bölümündeki tüm seçimleri tamamla.</p>
             <div id="wrapChartMe" class="hidden">
-              <canvas id="chartMe" height="260" aria-label="Benim radar grafik" role="img"></canvas>
+              <div class="chart-container">
+                <canvas id="chartMe" aria-label="Benim radar grafik" role="img"></canvas>
+              </div>
+              <div class="chart-legend">
+                <div class="legend-item">
+                  <div class="legend-color me"></div>
+                  <span>Ben</span>
+                </div>
+              </div>
             </div>
           </div>
 
+          <!-- ONUN GRAFİĞİ -->
           <div class="chart-panel">
-            <p class="chart-title">Onun Grafik</p>
-            <p class="hint" id="hintChartOther">Grafiği görmek için “Onun Davranışları” bölümündeki tüm seçimleri tamamla.</p>
+            <p class="chart-title">Onun Konfor Alanı</p>
+            <p class="hint" id="hintChartOther">Grafiği görmek için "Onun Davranışları" bölümündeki tüm seçimleri tamamla.</p>
             <div id="wrapChartOther" class="hidden">
-              <canvas id="chartOther" height="260" aria-label="Onun radar grafik" role="img"></canvas>
+              <div class="chart-container">
+                <canvas id="chartOther" aria-label="Onun radar grafik" role="img"></canvas>
+              </div>
+              <div class="chart-legend">
+                <div class="legend-item">
+                  <div class="legend-color other"></div>
+                  <span>O</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- KARŞILAŞTIRMA GRAFİĞİ -->
+          <div class="chart-panel">
+            <p class="chart-title">Karşılaştırmalı Görünüm</p>
+            <p class="hint" id="hintChartCompare">Grafiği görmek için her iki bölümdeki tüm seçimleri tamamla.</p>
+            <div id="wrapChartCompare" class="hidden">
+              <div class="chart-container">
+                <canvas id="chartCompare" aria-label="Karşılaştırmalı radar grafik" role="img"></canvas>
+              </div>
+              <div class="chart-legend">
+                <div class="legend-item">
+                  <div class="legend-color me"></div>
+                  <span>Ben</span>
+                </div>
+                <div class="legend-item">
+                  <div class="legend-color other"></div>
+                  <span>O</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- KARŞILAŞTIRMA -->
+    <!-- KARŞILAŞTIRMA TABLOSU -->
     <section class="card" aria-labelledby="sec-compare">
-      <h2 class="section-title" id="sec-compare">Bende Fazla Olan Davranışlar</h2>
-      <p class="hint" id="hintCompare">Her iki değerlendirme de tamamlanınca, “bende daha yüksek olan” davranışlar burada listelenir.</p>
+      <h2 class="section-title" id="sec-compare">Davranış Karşılaştırma Tablosu</h2>
+      <p class="hint" id="hintCompare">Her iki değerlendirme de tamamlanınca, tüm davranışların karşılaştırması bu tabloda görüntülenir.</p>
 
       <div id="wrapCompare" class="hidden">
-        <ul class="list" id="compareList"></ul>
-        <p class="hint" id="hintCompareEmpty" style="margin-top:10px" class="hidden"></p>
+        <div class="compare-table-scroll">
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th class="behavior-name">Davranış</th>
+                <th>Benim Şiddetim</th>
+                <th>Onun Şiddeti</th>
+                <th>Fark (Ben - O)</th>
+              </tr>
+            </thead>
+            <tbody id="compareTableBody"></tbody>
+          </table>
+        </div>
+        <p class="hint" style="margin-top:12px;">Pozitif fark (+): Benim davranışım daha yüksek | Negatif fark (–): Onun davranışı daha yüksek</p>
       </div>
     </section>
 
-    <footer>Arka plan: beyaz • Mobil: tablo yatay kaydırılabilir • Sol sütun sabit • 2 değerlendirme + 2 radar grafik + fark listesi</footer>
+    <footer>Arka plan: beyaz • Mobil: tablo yatay kaydırılabilir • Sol sütun sabit • 2 akordeon + 3 radar grafik + karşılaştırma tablosu</footer>
   </div>
 
   <script>
@@ -411,15 +597,52 @@
 
     const hintChartMe = document.getElementById("hintChartMe");
     const hintChartOther = document.getElementById("hintChartOther");
+    const hintChartCompare = document.getElementById("hintChartCompare");
     const wrapChartMe = document.getElementById("wrapChartMe");
     const wrapChartOther = document.getElementById("wrapChartOther");
+    const wrapChartCompare = document.getElementById("wrapChartCompare");
 
     const hintCompare = document.getElementById("hintCompare");
     const wrapCompare = document.getElementById("wrapCompare");
-    const compareList = document.getElementById("compareList");
+    const compareTableBody = document.getElementById("compareTableBody");
+
+    // Akordeon elementleri
+    const accordionMe = document.getElementById("accordion-me");
+    const accordionOther = document.getElementById("accordion-other");
+    const headerMe = document.getElementById("header-me");
+    const headerOther = document.getElementById("header-other");
 
     totalMeEl.textContent = behaviors.length;
     totalOtherEl.textContent = behaviors.length;
+
+    // --- GÜNCELLENMİŞ Akordeon Fonksiyonları ---
+    function toggleAccordion(clickedAccordion, clickedHeader) {
+      const allAccordions = [accordionMe, accordionOther];
+      const allHeaders = [headerMe, headerOther];
+      
+      // Tıklanan akordeonun durumunu kontrol et
+      const isCurrentlyOpen = clickedAccordion.classList.contains("accordion-open");
+      
+      // Tüm akordeonları kapat
+      allAccordions.forEach(accordion => {
+        accordion.classList.remove("accordion-open");
+      });
+      
+      // Tüm header'ları kapalı duruma getir
+      allHeaders.forEach(header => {
+        header.setAttribute("aria-expanded", "false");
+      });
+      
+      // Eğer tıklanan akordeon zaten açık değilse, onu aç
+      if (!isCurrentlyOpen) {
+        clickedAccordion.classList.add("accordion-open");
+        clickedHeader.setAttribute("aria-expanded", "true");
+      }
+    }
+
+    // Akordeon event listener'ları
+    headerMe.addEventListener("click", () => toggleAccordion(accordionMe, headerMe));
+    headerOther.addEventListener("click", () => toggleAccordion(accordionOther, headerOther));
 
     // --- Build tables ---
     function buildTable(tbody, prefix){
@@ -492,88 +715,166 @@
     // --- Charts ---
     let chartMeInstance = null;
     let chartOtherInstance = null;
+    let chartCompareInstance = null;
 
-    function renderChart(canvasId, instanceRef, data){
+    function renderChart(canvasId, instanceRef, data, isCompare = false){
       const ctx = document.getElementById(canvasId);
 
-      if(instanceRef.current){
+      if(instanceRef.current && !isCompare){
         instanceRef.current.data.labels = behaviors;
         instanceRef.current.data.datasets[0].data = data;
         instanceRef.current.update();
         return;
       }
 
-      instanceRef.current = new Chart(ctx, {
-        type: "radar",
-        data: {
-          labels: behaviors,
-          datasets: [{
-            label: "Şiddet (1–9)",
-            data,
-            fill: true,
-            borderWidth: 2,
-            pointRadius: 3
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            r: {
-              min: 1,
-              max: 9,
-              ticks: { stepSize: 1 }
-            }
-          },
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: { label: (ctx) => `${ctx.label}: ${ctx.parsed.r}` }
-            }
-          }
-        }
-      });
-    }
-
-    function renderCompareList(meData, otherData){
-      compareList.innerHTML = "";
-
-      const diffs = behaviors.map((name, i) => ({
-        name,
-        me: meData[i],
-        other: otherData[i],
-        diff: meData[i] - otherData[i]
-      })).filter(x => x.diff > 0)
-        .sort((a,b) => b.diff - a.diff);
-
-      if(diffs.length === 0){
-        const li = document.createElement("li");
-        li.className = "row";
-        li.innerHTML = `<span class="name">Bende daha yüksek davranış yok</span>
-                        <span class="meta"><span class="chip">Fark: 0+</span></span>`;
-        compareList.appendChild(li);
+      if(isCompare && instanceRef.current){
+        // Karşılaştırma grafiği için iki dataset güncelle
+        instanceRef.current.data.labels = behaviors;
+        instanceRef.current.data.datasets[0].data = data.meData;
+        instanceRef.current.data.datasets[1].data = data.otherData;
+        instanceRef.current.update();
         return;
       }
 
-      diffs.forEach(item => {
-        const li = document.createElement("li");
-        li.className = "row";
+      if(isCompare){
+        // Karşılaştırma grafiği oluştur (iki dataset)
+        instanceRef.current = new Chart(ctx, {
+          type: "radar",
+          data: {
+            labels: behaviors,
+            datasets: [
+              {
+                label: "Ben",
+                data: data.meData,
+                fill: true,
+                backgroundColor: "rgba(37, 99, 235, 0.2)",
+                borderColor: "rgb(37, 99, 235)",
+                borderWidth: 2,
+                pointRadius: 3,
+                pointBackgroundColor: "rgb(37, 99, 235)"
+              },
+              {
+                label: "O",
+                data: data.otherData,
+                fill: true,
+                backgroundColor: "rgba(220, 38, 38, 0.2)",
+                borderColor: "rgb(220, 38, 38)",
+                borderWidth: 2,
+                pointRadius: 3,
+                pointBackgroundColor: "rgb(220, 38, 38)"
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              r: {
+                min: 1,
+                max: 9,
+                ticks: { stepSize: 1 }
+              }
+            },
+            plugins: {
+              legend: { 
+                display: false // Legend'ı CSS ile kendimiz yapıyoruz
+              },
+              tooltip: {
+                callbacks: { 
+                  label: (ctx) => `${ctx.dataset.label} - ${ctx.label}: ${ctx.parsed.r}`
+                }
+              }
+            }
+          }
+        });
+      } else {
+        // Normal tek grafik
+        instanceRef.current = new Chart(ctx, {
+          type: "radar",
+          data: {
+            labels: behaviors,
+            datasets: [{
+              label: "Şiddet (1–9)",
+              data,
+              fill: true,
+              borderWidth: 2,
+              pointRadius: 3,
+              backgroundColor: canvasId === "chartMe" ? "rgba(37, 99, 235, 0.2)" : "rgba(220, 38, 38, 0.2)",
+              borderColor: canvasId === "chartMe" ? "rgb(37, 99, 235)" : "rgb(220, 38, 38)",
+              pointBackgroundColor: canvasId === "chartMe" ? "rgb(37, 99, 235)" : "rgb(220, 38, 38)"
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              r: {
+                min: 1,
+                max: 9,
+                ticks: { stepSize: 1 }
+              }
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: { label: (ctx) => `${ctx.label}: ${ctx.parsed.r}` }
+              }
+            }
+          }
+        });
+      }
+    }
 
-        const left = document.createElement("span");
-        left.className = "name";
-        left.textContent = item.name;
+    // --- Karşılaştırma Tablosu Oluşturma ---
+    function renderCompareTable(meData, otherData){
+      compareTableBody.innerHTML = "";
 
-        const right = document.createElement("span");
-        right.className = "meta";
-        right.innerHTML = `
-          <span class="chip">Ben: ${item.me}</span>
-          <span class="chip">O: ${item.other}</span>
-          <span class="chip">+${item.diff}</span>
-        `;
-
-        li.appendChild(left);
-        li.appendChild(right);
-        compareList.appendChild(li);
+      behaviors.forEach((name, i) => {
+        const meVal = meData[i];
+        const otherVal = otherData[i];
+        const diff = meVal - otherVal;
+        
+        const tr = document.createElement("tr");
+        
+        // Davranış adı
+        const tdName = document.createElement("td");
+        tdName.className = "behavior-name";
+        tdName.textContent = name;
+        
+        // Benim şiddetim
+        const tdMe = document.createElement("td");
+        tdMe.className = "score";
+        tdMe.textContent = meVal;
+        
+        // Onun şiddeti
+        const tdOther = document.createElement("td");
+        tdOther.className = "score";
+        tdOther.textContent = otherVal;
+        
+        // Fark
+        const tdDiff = document.createElement("td");
+        const diffSpan = document.createElement("span");
+        diffSpan.className = "diff";
+        
+        if (diff > 0) {
+          diffSpan.classList.add("diff-positive");
+          diffSpan.textContent = `+${diff}`;
+        } else if (diff < 0) {
+          diffSpan.classList.add("diff-negative");
+          diffSpan.textContent = `${diff}`; // zaten eksi işaretli
+        } else {
+          diffSpan.classList.add("diff-zero");
+          diffSpan.textContent = "0";
+        }
+        
+        tdDiff.appendChild(diffSpan);
+        
+        tr.appendChild(tdName);
+        tr.appendChild(tdMe);
+        tr.appendChild(tdOther);
+        tr.appendChild(tdDiff);
+        
+        compareTableBody.appendChild(tr);
       });
     }
 
@@ -606,15 +907,23 @@
         wrapChartOther.classList.add("hidden");
       }
 
-      // Karşılaştırma
+      // Karşılaştırma Grafiği
       if(me.allDone && other.allDone){
-        hintCompare.classList.add("hidden");
-        wrapCompare.classList.remove("hidden");
-
+        hintChartCompare.classList.add("hidden");
+        wrapChartCompare.classList.remove("hidden");
+        
         const meData = me.selections.map(Number);
         const otherData = other.selections.map(Number);
-        renderCompareList(meData, otherData);
+        renderChart("chartCompare", { current: chartCompareInstance }, { meData, otherData }, true);
+        chartCompareInstance = Chart.getChart("chartCompare") || chartCompareInstance;
+
+        // Karşılaştırma Tablosu
+        hintCompare.classList.add("hidden");
+        wrapCompare.classList.remove("hidden");
+        renderCompareTable(meData, otherData);
       } else {
+        hintChartCompare.classList.remove("hidden");
+        wrapChartCompare.classList.add("hidden");
         hintCompare.classList.remove("hidden");
         wrapCompare.classList.add("hidden");
       }
